@@ -27,8 +27,3 @@ struct ExtendedIngredient: Codable, Identifiable {
 struct AnalyzedInstruction: Codable {
     let steps: [Step] 
 }
-
-struct Step: Codable {
-    let number: Int
-    let step: String
-}

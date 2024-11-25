@@ -6,9 +6,11 @@
 //
 
 import SwiftUI
+import CoreData
 
 @main
 struct CookSmartApp: App {
+    
     var body: some Scene {
         WindowGroup {
             RootView()

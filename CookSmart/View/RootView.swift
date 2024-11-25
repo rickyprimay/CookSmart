@@ -8,6 +8,9 @@
 import SwiftUI
 
 struct RootView: View {
+    
+    @Environment(\.managedObjectContext) private var context
+    
     var body: some View {
         TabView {
             HomeFoodView()
@@ -15,10 +18,16 @@ struct RootView: View {
                     Label("Beranda", systemImage: "house.fill")
                 }
             
-            Text("Favorites")
+            FavoritesFoodView()
                 .tabItem {
                     Label("Favorit", systemImage: "heart.fill")
                 }
+            
+            PlanFoodView()
+                .tabItem{
+                    Label("Plan Makan", systemImage: "calendar")
+                }
+            
             Text("Belanja Produk")
                 .tabItem {
                     Label("Belanja", systemImage: "bag.fill")

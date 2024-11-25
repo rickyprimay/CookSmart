@@ -14,7 +14,6 @@ struct RecipeCardViews: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 5) {
-            // Gambar Resep
             WebImage(url: URL(string: foodRecipe.image ?? ""))
                 .resizable()
                 .scaledToFill()
@@ -22,7 +21,6 @@ struct RecipeCardViews: View {
                 .cornerRadius(10)
                 .clipped()
 
-            // Judul Resep
             Text(foodRecipe.title ?? "")
                 .font(.headline)
                 .lineLimit(2)
@@ -30,14 +28,12 @@ struct RecipeCardViews: View {
                 .frame(maxWidth: 150, alignment: .leading)
 
             HStack {
-                // Durasi
                 Text("\(foodRecipe.readyInMinutes) minutes")
                     .font(.caption)
                     .foregroundColor(.secondary)
 
                 Spacer()
 
-                // Label Status Resep
                 if foodRecipe.vegan {
                     statusLabel(text: "Vegan", color: .green)
                 } else if foodRecipe.vegetarian {
@@ -67,11 +63,11 @@ struct RecipeCardViews: View {
 }
 
 struct RecipeListItemView: View {
-    let foodRecipe: Recipe
+    let foodRecipe: SearchRecipe
     
     var body: some View {
         HStack(spacing: 15) {
-            WebImage(url: URL(string: foodRecipe.image ?? ""))
+            WebImage(url: URL(string: foodRecipe.image))
                 .resizable()
                 .scaledToFill()
                 .frame(width: 80, height: 80)
@@ -79,14 +75,11 @@ struct RecipeListItemView: View {
                 .clipped()
             
             VStack(alignment: .leading, spacing: 5) {
-                Text(foodRecipe.title ?? "")
+                Text(foodRecipe.title)
                     .font(.headline)
                     .lineLimit(2)
                     .multilineTextAlignment(.leading)
                 
-                Text("\(foodRecipe.readyInMinutes) minutes")
-                    .font(.caption)
-                    .foregroundColor(.secondary)
             }
             Spacer()
         }
