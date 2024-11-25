@@ -16,3 +16,13 @@ struct SearchRecipe: Decodable, Identifiable {
 struct SearchRecipeResult : Decodable {
     let results: [SearchRecipe]
 }
+
+struct GenerateRecipe: Decodable, Identifiable {
+    let id: Int
+    let title: String
+    let image: String
+}
+
+struct GenerateRecipeResult : Decodable {
+    let results: [GenerateRecipe]
+}

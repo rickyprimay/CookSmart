@@ -10,6 +10,7 @@ import SwiftUI
 struct RootView: View {
     
     @Environment(\.managedObjectContext) private var context
+    @AppStorage("isFirstTime") private var isFirstTime: Bool = true
     
     var body: some View {
         TabView {
@@ -28,11 +29,15 @@ struct RootView: View {
                     Label("Plan Makan", systemImage: "calendar")
                 }
             
-            Text("Belanja Produk")
+            ShopingFoodView()
                 .tabItem {
                     Label("Belanja", systemImage: "bag.fill")
                 }
         }
+        .sheet(isPresented: $isFirstTime, content: {
+            IntroScreenView()
+                .interactiveDismissDisabled()
+        })
     }
 }
 

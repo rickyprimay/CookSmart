@@ -22,12 +22,12 @@ struct AddSheetView: View {
                 .ignoresSafeArea()
             
             VStack(spacing: 20) {
-                Text("Add Ingredients")
+                Text("Tambahkan Bahan")
                     .font(.title)
                     .fontWeight(.bold)
                     .foregroundColor(.primary)
                 
-                Text("Enter the ingredients you want to add.")
+                Text("Masukkan bahan-bahan yang kamu punya.")
                     .font(.subheadline)
                     .foregroundColor(.secondary)
                 
@@ -51,22 +51,22 @@ struct AddSheetView: View {
                         newIngredient = ""
                     }
                     
-                    if vegetarian {
+                    if vegetarian && !ingredients.contains("Vegetarian") {
                         ingredients.append("Vegetarian")
                     }
-                    if vegan {
+                    if vegan && !ingredients.contains("Vegan") {
                         ingredients.append("Vegan")
                     }
-                    if gluten {
-                        ingredients.append("Gluten")
+                    if gluten && !ingredients.contains("Gluten-Free") {
+                        ingredients.append("Gluten-Free")
                     }
-                    if keto {
+                    if keto && !ingredients.contains("Keto") {
                         ingredients.append("Keto")
                     }
                     
                     presentationMode.wrappedValue.dismiss()
                 } label: {
-                    Text("Add")
+                    Text("Save Filters")
                         .font(.headline)
                         .foregroundColor(.white)
                         .frame(maxWidth: .infinity)

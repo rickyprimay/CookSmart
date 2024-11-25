@@ -28,8 +28,9 @@ class SQLiteManager {
             
 //            let dropTableQuery = "DROP TABLE IF EXISTS favorites;"
 //            let dropTableQuery2 = "DROP TABLE IF EXISTS plan_food;"
+//            let dropTableQuery3 = "DROP TABLE IF EXISTS shoping;"
 //
-//            let combinedQuery = dropTableQuery + dropTableQuery2
+//            let combinedQuery = dropTableQuery + dropTableQuery2 + dropTableQuery3
 //
 //            if sqlite3_exec(db, combinedQuery, nil, nil, nil) != SQLITE_OK {
 //                let errorMessage = String(cString: sqlite3_errmsg(db))
@@ -38,6 +39,7 @@ class SQLiteManager {
             
             createFavoritesTable()
             createPlanFoodTable()
+            createShopingFoodTable()
         } catch {
             print("Failed to setup database: \(error)")
         }
@@ -76,6 +78,23 @@ class SQLiteManager {
             print("Failed to create table: \(errorMessage)")
         } else {
             print("Table 'plan_food' checked/created successfully.")
+        }
+    }
+    
+    private func createShopingFoodTable() {
+        let createTableQuery = """
+        CREATE TABLE IF NOT EXISTS shoping (
+            id INTEGER PRIMARY KEY,
+            name VARCHAR(255),
+            original VARCHAR(255)
+        );
+        """
+        
+        if sqlite3_exec(db, createTableQuery, nil, nil, nil) != SQLITE_OK {
+            let errorMessage = String(cString: sqlite3_errmsg(db))
+            print("Failed to create table: \(errorMessage)")
+        } else {
+            print("Table 'shoping' checked/created successfully.")
         }
     }
     
@@ -298,8 +317,98 @@ class SQLiteManager {
         print("DEBUG: Total Plan Foods Fetched: \(planFoods.count)")
         return planFoods
     }
-
     
+    func deletePlanFood(byId id: Int) {
+        let deleteQuery = "DELETE FROM plan_food WHERE idRecipe = ?;"
+        var statement: OpaquePointer?
+        
+        if sqlite3_prepare_v2(db, deleteQuery, -1, &statement, nil) == SQLITE_OK {
+            sqlite3_bind_int(statement, 1, Int32(id))
+            
+            if sqlite3_step(statement) == SQLITE_DONE {
+                print("Successfully deleted plan food with id \(id).")
+            } else {
+                print("Could not delete plan food. Error: \(String(cString: sqlite3_errmsg(db)))")
+            }
+        } else {
+            print("Failed to prepare delete statement. Error: \(String(cString: sqlite3_errmsg(db)))")
+        }
+        
+        sqlite3_finalize(statement)
+    }
+    
+    func addShoppingItem(id: Int, name: String, original: String) {
+        guard !name.isEmpty, !original.isEmpty else {
+            print("Error: Name or Original is empty.")
+            return
+        }
+        
+        let insertQuery = "INSERT INTO shoping (id, name, original) VALUES (?, ?, ?);"
+        
+        var statement: OpaquePointer?
+        
+        if sqlite3_prepare_v2(db, insertQuery, -1, &statement, nil) == SQLITE_OK {
+            sqlite3_bind_int(statement, 1, Int32(id))
+            sqlite3_bind_text(statement, 2, (name as NSString).utf8String, -1, nil)
+            sqlite3_bind_text(statement, 3, (original as NSString).utf8String, -1, nil)
+            
+            if sqlite3_step(statement) == SQLITE_DONE {
+                print("Successfully added shopping item: \(name).")
+            } else {
+                print("Failed to add shopping item: \(String(cString: sqlite3_errmsg(db)))")
+            }
+        } else {
+            print("Failed to prepare statement: \(String(cString: sqlite3_errmsg(db)))")
+        }
+        
+        sqlite3_finalize(statement)
+    }
+
+
+    func getAllShoppingItems() -> [Shoping] {
+        var shoppingItems: [Shoping] = []
+        let selectQuery = "SELECT id, name, original FROM shoping;"
+        var statement: OpaquePointer?
+        
+        if sqlite3_prepare_v2(db, selectQuery, -1, &statement, nil) == SQLITE_OK {
+            while sqlite3_step(statement) == SQLITE_ROW {
+                let id = sqlite3_column_int(statement, 0)
+                let rawName = sqlite3_column_text(statement, 1)
+                let rawOriginal = sqlite3_column_text(statement, 2)
+                
+                let name = rawName != nil ? String(cString: rawName!) : "Unknown"
+                let original = rawOriginal != nil ? String(cString: rawOriginal!) : "Unknown"
+                
+                let shoppingItem = Shoping(id: Int(id), name: name, original: original)
+                shoppingItems.append(shoppingItem)
+            }
+        } else {
+            let errorMessage = String(cString: sqlite3_errmsg(db))
+            print("Failed to prepare statement: \(errorMessage)")
+        }
+        
+        sqlite3_finalize(statement)
+        return shoppingItems
+    }
+    
+    func deleteShoppingItem(byId id: Int) {
+        let deleteQuery = "DELETE FROM shoping WHERE id = ?;"
+        var statement: OpaquePointer?
+        
+        if sqlite3_prepare_v2(db, deleteQuery, -1, &statement, nil) == SQLITE_OK {
+            sqlite3_bind_int(statement, 1, Int32(id))
+            
+            if sqlite3_step(statement) == SQLITE_DONE {
+                print("Successfully deleted shopping item with id \(id).")
+            } else {
+                print("Failed to delete shopping item. Error: \(String(cString: sqlite3_errmsg(db)))")
+            }
+        } else {
+            print("Failed to prepare delete statement. Error: \(String(cString: sqlite3_errmsg(db)))")
+        }
+        
+        sqlite3_finalize(statement)
+    }
     
     deinit {
         sqlite3_close(db)

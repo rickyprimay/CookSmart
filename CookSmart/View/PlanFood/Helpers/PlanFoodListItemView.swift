@@ -10,6 +10,7 @@ import SDWebImageSwiftUI
 
 struct PlanFoodListItemView: View {
     let foodRecipe: PlanFood
+    let onDelete: () -> Void
     
     var body: some View {
         HStack(spacing: 15) {
@@ -38,7 +39,16 @@ struct PlanFoodListItemView: View {
                         .foregroundColor(.secondary)
                 }
             }
+            
             Spacer()
+            
+            Button(action: {
+                onDelete()
+            }) {
+                Image(systemName: "trash")
+                    .foregroundColor(.red)
+            }
+            .buttonStyle(PlainButtonStyle())
         }
         .padding()
         .background(Color(.systemGray6))

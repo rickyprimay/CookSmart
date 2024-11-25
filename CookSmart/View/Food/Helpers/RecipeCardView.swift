@@ -122,6 +122,21 @@ struct RecipeCardView: View {
                                             .fontWeight(.medium)
                                             .font(.subheadline)
                                         Spacer()
+                                        
+                                        Button {
+                                            SQLiteManager.shared.addShoppingItem(
+                                                id: ingredient.id,
+                                                name: ingredient.name,
+                                                original: ingredient.original
+                                            )
+                                        } label: {
+                                            Image(systemName: "plus")
+                                                .font(.title)
+                                                .fontWeight(.regular)
+                                                .foregroundStyle(.green)
+                                                .padding(8)
+                                                .background(Color(hex: "#F1F1F1"), in: RoundedRectangle(cornerRadius: 10))
+                                        }
                                     }
                                     .frame(maxWidth: .infinity)
                                     .padding()
@@ -131,6 +146,7 @@ struct RecipeCardView: View {
                                             .shadow(color: .black.opacity(0.3), radius: 3)
                                     }
                                 }
+
                             }
                         }
                         .padding(.top, 20)
@@ -170,6 +186,7 @@ struct RecipeCardView: View {
             }
             .padding(.top, 20)
         }
+        .padding(.top, 100)
         .task {
             await viewModel.getRecipeById(id: recipeId)
         }

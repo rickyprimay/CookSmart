@@ -14,10 +14,13 @@ struct PlanFoodView: View {
     @State private var startDate: Date = Calendar.current.date(byAdding: .day, value: -1, to: Date())!
     @State private var endDate: Date = Date()
     @State private var totalCalories: Float = 0
-    
+
     var body: some View {
         NavigationView {
             ZStack {
+                Color(hex: "#FFF6E9")
+                    .ignoresSafeArea()
+                
                 VStack {
                     HStack {
                         DatePicker("Start Date", selection: $startDate, displayedComponents: .date)
@@ -35,27 +38,41 @@ struct PlanFoodView: View {
                             totalCalories = planFood.reduce(0) { $0 + ($1.calories ?? 0.0) }
                         }
                         .padding(.leading, 8)
-
                     }
                     .padding()
                     
-                    Text("Total Kalori : \(totalCalories, specifier: "%.0f")")
+                    Text("Total Kalori : \(totalCalories, specifier: "%.0f") kCal")
                         .font(.headline)
                         .padding()
-                    
+
                     if planFood.isEmpty {
-                        Text("No Plan Food")
-                            .font(.headline)
-                            .foregroundColor(.gray)
+                        VStack {
+                            Image(systemName: "leaf.arrow.circlepath")
+                                .resizable()
+                                .scaledToFit()
+                                .frame(width: 100, height: 100)
+                                .foregroundColor(.green)
+                                .padding(.bottom, 16)
+                            
+                            Text("Belum ada rencana makanan.")
+                                .font(.headline)
+                                .foregroundColor(.gray)
+                                .padding(.bottom, 8)
+                            
+                            Text("Mulailah dengan menambahkan rencana makanan sehat untuk mencapai tujuan kalori harian Anda!")
+                                .font(.subheadline)
+                                .multilineTextAlignment(.center)
+                                .foregroundColor(.secondary)
+                                .padding(.horizontal)
+                        }
+                        .padding()
                     } else {
                         ScrollView {
                             VStack(spacing: 15) {
                                 ForEach(planFood, id: \.idRecipe) { food in
-                                    NavigationLink(destination: DetailFood(
-                                        viewModel: viewModel,
-                                        idRecipe: food.idRecipe
-                                    )) {
-                                        PlanFoodListItemView(foodRecipe: food)
+                                    PlanFoodListItemView(foodRecipe: food) {
+                                        SQLiteManager.shared.deletePlanFood(byId: food.idRecipe)
+                                        loadFavorites()
                                     }
                                 }
                             }
@@ -68,13 +85,11 @@ struct PlanFoodView: View {
                 loadFavorites()
             }
             .navigationTitle("Plan Makan")
-            .background(Color(hex: "#FFF6E9"))
         }
     }
     
     private func loadFavorites() {
         planFood = SQLiteManager.shared.getPlanFoodByDateRange(startDate: startDate, endDate: endDate)
-        
         totalCalories = planFood.reduce(0) { $0 + ($1.calories ?? 0.0) }
     }
 }

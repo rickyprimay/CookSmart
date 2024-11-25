@@ -89,3 +89,31 @@ struct RecipeListItemView: View {
         .shadow(color: Color.black.opacity(0.1), radius: 5, x: 0, y: 5)
     }
 }
+
+struct GenerateRecipeListItemView: View {
+    let foodRecipe: GenerateRecipe
+    
+    var body: some View {
+        HStack(spacing: 15) {
+            WebImage(url: URL(string: foodRecipe.image))
+                .resizable()
+                .scaledToFill()
+                .frame(width: 80, height: 80)
+                .cornerRadius(10)
+                .clipped()
+            
+            VStack(alignment: .leading, spacing: 5) {
+                Text(foodRecipe.title)
+                    .font(.headline)
+                    .lineLimit(2)
+                    .multilineTextAlignment(.leading)
+                
+            }
+            Spacer()
+        }
+        .padding()
+        .background(Color(.systemGray6))
+        .cornerRadius(12)
+        .shadow(color: Color.black.opacity(0.1), radius: 5, x: 0, y: 5)
+    }
+}

@@ -1,3 +1,10 @@
+//
+//  HomeFoodView.swift
+//  CookSmart
+//
+//  Created by Ricky Primayuda Putra on 20/11/24.
+//
+
 import SwiftUI
 
 struct HomeFoodView: View {
@@ -12,7 +19,12 @@ struct HomeFoodView: View {
     @State private var gluten = false
     @State private var keto = false
     
+    @State private var showErrorAlert = false
+    @State private var errorMessage = ""
+    
     @State private var hasFetchedRandomRecipe = false
+    
+    @State private var showAllRecipesSheet = false
     
     var body: some View {
         NavigationView {
@@ -76,6 +88,31 @@ struct HomeFoodView: View {
                     keto: $keto
                 )
             }
+            .sheet(isPresented: $showAllRecipesSheet) {
+                VStack {
+                    Text("Semua Resep")
+                        .font(.title)
+                        .fontWeight(.bold)
+                        .padding()
+
+                    ScrollView {
+                        LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 20) {
+                            ForEach(viewModel.foodRecipe) { recipe in
+                                NavigationLink(destination: DetailFood(
+                                    viewModel: viewModel,
+                                    idRecipe: recipe.id
+                                )) {
+                                    RecipeCardViews(foodRecipe: recipe, viewModel: viewModel)
+                                        .frame(maxWidth: .infinity, maxHeight: 200)
+                                }
+                            }
+                        }
+                        .padding()
+                    }
+                }
+                .padding()
+            }
+
             .onAppear {
                 if !hasFetchedRandomRecipe {
                     Task {
@@ -91,11 +128,11 @@ struct HomeFoodView: View {
     private var headerSection: some View {
         HStack {
             VStack(alignment: .leading) {
-                Text("What’s cooking tonight?")
+                Text("Apa yang akan dimasak hari ini?")
                     .font(.title)
                     .fontWeight(.bold)
                     .foregroundColor(.primary)
-                Text("Find recipes based on your ingredients!")
+                Text("Temukan resep berdasarkan bahan yang kamu miliki!")
                     .font(.subheadline)
                     .foregroundColor(.secondary)
             }
@@ -121,12 +158,14 @@ struct HomeFoodView: View {
                     .cornerRadius(10)
                     .padding(.trailing, 5)
                 
-                Text("We'll conjure a recipe from your ingredients")
+                Text("Kami akan mencarikan resep dari bahan yang kamu miliki")
                     .foregroundColor(.black.opacity(0.6))
                     .font(.title3)
                     .fontWeight(.medium)
+                
             }
             .padding(.horizontal)
+            .padding(.top)
             
             LazyVGrid(columns: [GridItem(.adaptive(minimum: 100))], alignment: .leading) {
                 ForEach(ingredients, id: \.self) { ingredient in
@@ -144,7 +183,16 @@ struct HomeFoodView: View {
     
     private var recipesSection: some View {
         VStack(alignment: .leading, spacing: 20) {
-            if searchText.isEmpty {
+            if !viewModel.generateRecipeResult.isEmpty {
+                ForEach(viewModel.generateRecipeResult) { recipe in
+                    NavigationLink(destination: DetailFood(
+                        viewModel: viewModel,
+                        idRecipe: recipe.id
+                    )) {
+                        GenerateRecipeListItemView(foodRecipe: recipe)
+                    }
+                }
+            } else if searchText.isEmpty {
                 recommendedRecipesSection
             } else {
                 searchResultsSection
@@ -156,20 +204,22 @@ struct HomeFoodView: View {
     private var recommendedRecipesSection: some View {
         VStack(alignment: .leading, spacing: 20) {
             HStack {
-                Text("Recommended for You")
+                Text("Rekomendasi untuk Kamu")
                     .font(.headline)
                     .padding(.horizontal)
                 
                 Spacer()
                 
-                Button("See All") {}
-                    .font(.subheadline)
-                    .padding(.horizontal)
+                Button("Lihat semua") {
+                    showAllRecipesSheet.toggle()
+                }
+                .font(.subheadline)
+                .padding(.horizontal)
             }
             
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 15) {
-                    ForEach(viewModel.foodRecipe) { foodRecipe in
+                    ForEach(viewModel.recommendedRecipes) { foodRecipe in
                         NavigationLink(destination: DetailFood(
                             viewModel: viewModel,
                             idRecipe: foodRecipe.id
@@ -185,12 +235,12 @@ struct HomeFoodView: View {
     
     private var searchResultsSection: some View {
         VStack(alignment: .leading, spacing: 20) {
-            Text("Search Results")
+            Text("Hasil Pencarian")
                 .font(.headline)
                 .padding(.horizontal)
             
             if viewModel.searchRecipeResult.isEmpty {
-                Text("No results found.")
+                Text("Tidak ada hasil ditemukan.")
                     .font(.body)
                     .foregroundColor(.secondary)
                     .padding()
@@ -215,6 +265,16 @@ struct HomeFoodView: View {
             Button {
                 if let index = ingredients.firstIndex(of: ingredient) {
                     ingredients.remove(at: index)
+                }
+                
+                if ingredient == "Vegetarian" {
+                    vegetarian = false
+                } else if ingredient == "Vegan" {
+                    vegan = false
+                } else if ingredient == "Gluten-Free" {
+                    gluten = false
+                } else if ingredient == "Keto" {
+                    keto = false
                 }
             } label: {
                 Image(systemName: "xmark")
@@ -247,7 +307,7 @@ struct HomeFoodView: View {
         ]
         
         Task {
-            await viewModel.generateRecipe(query: searchText, filters: filters)
+            await viewModel.generateRecipe(query: searchText, filters: filters, ingredients: ingredients)
         }
     }
 }

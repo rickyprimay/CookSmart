@@ -21,7 +21,7 @@ struct RecipeFavoriteListItemView: View {
                 .clipped()
             
             VStack(alignment: .leading, spacing: 5) {
-                Text(foodRecipe.title ?? "lonte")
+                Text(foodRecipe.title ?? "test")
                     .font(.headline)
                     .lineLimit(2)
                     .multilineTextAlignment(.leading)

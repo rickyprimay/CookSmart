@@ -6,7 +6,7 @@
 //
 
 import SwiftUI
-import SDWebImageSwiftUI 
+import SDWebImageSwiftUI
 
 struct FavoritesFoodView: View {
     @State private var favoriteFoods: [FavoriteFood] = []
@@ -14,24 +14,45 @@ struct FavoritesFoodView: View {
     
     var body: some View {
         NavigationView {
-            VStack {
+            ZStack {
+                Color(hex: "#FFF6E9")
+                    .ignoresSafeArea()
                 if favoriteFoods.isEmpty {
-                    Text("No Favorites Yet")
-                        .font(.headline)
-                        .foregroundColor(.gray)
+                    VStack {
+                        Image(systemName: "star.slash")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 100, height: 100)
+                            .foregroundColor(.yellow)
+                            .padding(.bottom, 16)
+                        
+                        Text("Belum ada resep favorit.")
+                            .font(.headline)
+                            .foregroundColor(.gray)
+                            .padding(.bottom, 8)
+                        
+                        Text("Mulailah menambahkan resep yang Anda sukai ke daftar favorit untuk mempermudah pencarian!")
+                            .font(.subheadline)
+                            .multilineTextAlignment(.center)
+                            .foregroundColor(.secondary)
+                            .padding(.horizontal)
+                    }
+                    .padding()
                 } else {
-                    ScrollView {
-                        VStack(spacing: 15) {
-                            ForEach(favoriteFoods, id: \.idRecipe) { food in
-                                NavigationLink(destination: DetailFood(
-                                    viewModel: viewModel,
-                                    idRecipe: food.idRecipe
-                                )) {
-                                    RecipeFavoriteListItemView(foodRecipe: food)
+                    VStack {
+                        ScrollView {
+                            VStack(spacing: 15) {
+                                ForEach(favoriteFoods, id: \.idRecipe) { food in
+                                    NavigationLink(destination: DetailFood(
+                                        viewModel: viewModel,
+                                        idRecipe: food.idRecipe
+                                    )) {
+                                        RecipeFavoriteListItemView(foodRecipe: food)
+                                    }
                                 }
                             }
+                            .padding()
                         }
-                        .padding()
                     }
                 }
             }
@@ -40,7 +61,6 @@ struct FavoritesFoodView: View {
             }
             .navigationTitle("Resep Favorit")
             .background(Color(hex: "#FFF6E9"))
-//            .ignoresSafeArea()
         }
     }
     
