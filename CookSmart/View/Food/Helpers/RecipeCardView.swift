@@ -12,6 +12,7 @@ struct RecipeCardView: View {
     @State private var selectedTab: String = "ingred"
     
     @StateObject var viewModel = FoodRecipeViewModel()
+    @ObservedObject var authViewModel: AuthViewModel
     var recipeId: Int
     
     func removeHTMLTags(from html: String) -> String {
@@ -34,31 +35,31 @@ struct RecipeCardView: View {
                     .frame(height: (UIScreen.main.bounds.height * 2) / 3)
                     .shadow(color: .black.opacity(0.9), radius: 3)
                     .cornerRadius(10, corners: [.topRight, .topLeft])
-                
+
                 VStack {
                     Rectangle()
                         .fill(.white)
                         .frame(width: 60, height: 5)
                         .cornerRadius(10)
-                    
+
                     HStack {
                         Text(viewModel.foodRecipeDetail?.title ?? "")
                             .bold()
                             .font(.title2)
                             .foregroundColor(.black)
-                        
+
                         Spacer()
-                        
+
                         Image(systemName: "clock")
                         Text("\(viewModel.foodRecipeDetail?.readyInMinutes ?? 0) min")
                     }
                     .foregroundStyle(.secondary)
                     .padding(.top, 4)
                     .padding(.horizontal)
-                    
+
                     Text(removeHTMLTags(from: viewModel.foodRecipeDetail?.summary ?? "No description available."))
                         .padding(.top, 8)
-                    
+
                     Grid(alignment: .topLeading, horizontalSpacing: 60) {
                         GridRow {
                             ForEach(viewModel.nutrient, id: \.name) { nutrient in
@@ -79,7 +80,7 @@ struct RecipeCardView: View {
                             }
                         }
                     }
-                    
+
                     HStack(spacing: 0) {
                         Button {
                             self.selectedTab = "ingred"
@@ -93,7 +94,7 @@ struct RecipeCardView: View {
                                         .fontWeight(.bold)
                                 }
                         }
-                        
+
                         Button {
                             self.selectedTab = "instruct"
                         } label : {
@@ -111,24 +112,27 @@ struct RecipeCardView: View {
                                 .fill(.secondary.opacity(0.2))
                         }
                     }
-                    
+
                     if selectedTab == "ingred" {
                         ScrollView {
                             VStack(alignment: .leading, spacing: 10) {
-                                ForEach(viewModel.foodRecipeDetail?.extendedIngredients ?? [], id: \.name) { ingredient in
+                                let ingredients = viewModel.foodRecipeDetail?.extendedIngredients ?? []
+                                ForEach(ingredients, id: \.name) { ingredient in
                                     HStack(alignment: .top) {
                                         Text("✅")
                                         Text(ingredient.original)
                                             .fontWeight(.medium)
                                             .font(.subheadline)
                                         Spacer()
-                                        
+
                                         Button {
                                             SQLiteManager.shared.addShoppingItem(
+                                                userId: authViewModel.currentUser.uid,
                                                 id: ingredient.id,
                                                 name: ingredient.name,
                                                 original: ingredient.original
                                             )
+                                            print(authViewModel.currentUser.uid)
                                         } label: {
                                             Image(systemName: "plus")
                                                 .font(.title)
@@ -146,7 +150,6 @@ struct RecipeCardView: View {
                                             .shadow(color: .black.opacity(0.3), radius: 3)
                                     }
                                 }
-
                             }
                         }
                         .padding(.top, 20)
@@ -154,15 +157,16 @@ struct RecipeCardView: View {
                     } else {
                         ScrollView {
                             VStack(alignment: .leading) {
-                                ForEach(viewModel.foodRecipeDetail?.analyzedInstructions.flatMap { $0.steps } ?? [], id: \.number) { step in
+                                let steps = viewModel.foodRecipeDetail?.analyzedInstructions.flatMap { $0.steps } ?? []
+                                ForEach(steps, id: \.number) { step in
                                     HStack(alignment: .top) {
                                         Text("\(step.number). ")
                                             .bold()
-                                        
+
                                         Text(step.step)
                                             .fontWeight(.medium)
                                             .font(.subheadline)
-                                        
+
                                         Spacer()
                                     }
                                     .frame(maxWidth: .infinity)
@@ -191,4 +195,5 @@ struct RecipeCardView: View {
             await viewModel.getRecipeById(id: recipeId)
         }
     }
+
 }

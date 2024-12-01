@@ -19,17 +19,17 @@ struct RootView: View {
                     Label("Beranda", systemImage: "house.fill")
                 }
             
-            FavoritesFoodView()
+            FavoritesFoodView(authViewModel: AuthViewModel())
                 .tabItem {
                     Label("Favorit", systemImage: "heart.fill")
                 }
             
-            PlanFoodView()
+            PlanFoodView(authViewModel: AuthViewModel())
                 .tabItem{
                     Label("Plan Makan", systemImage: "calendar")
                 }
             
-            ShopingFoodView()
+            ShopingFoodView(authViewModel: AuthViewModel())
                 .tabItem {
                     Label("Belanja", systemImage: "bag.fill")
                 }

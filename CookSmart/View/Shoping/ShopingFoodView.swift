@@ -11,17 +11,36 @@ import SDWebImageSwiftUI
 struct ShopingFoodView: View {
     @State private var shoping: [Shoping] = []
     @StateObject var viewModel = FoodRecipeViewModel()
+    @StateObject var authViewModel: AuthViewModel
     
     var body: some View {
         NavigationView {
-            ZStack{
+            ZStack {
                 Color(hex: "#FFF6E9")
                     .ignoresSafeArea()
+                
                 VStack {
                     if shoping.isEmpty {
-                        Text("No Shopping Yet")
-                            .font(.headline)
-                            .foregroundColor(.gray)
+                        VStack {
+                            Image(systemName: "cart.fill.badge.minus")
+                                .resizable()
+                                .scaledToFit()
+                                .frame(width: 100, height: 100)
+                                .foregroundColor(.gray)
+                                .padding(.bottom, 16)
+                            
+                            Text("Belum Ada Belanjaan")
+                                .font(.headline)
+                                .foregroundColor(.gray)
+                                .padding(.bottom, 8)
+                            
+                            Text("Mulailah dengan menambahkan bahan makanan ke dalam daftar belanjaan Anda!")
+                                .font(.subheadline)
+                                .multilineTextAlignment(.center)
+                                .foregroundColor(.secondary)
+                                .padding(.horizontal)
+                        }
+                        .padding()
                     } else {
                         ScrollView {
                             VStack(spacing: 15) {
@@ -49,7 +68,6 @@ struct ShopingFoodView: View {
                     }
                 }
             }
-            
             .onAppear {
                 loadShoping()
             }
@@ -59,8 +77,13 @@ struct ShopingFoodView: View {
     }
     
     private func loadShoping() {
-        shoping = SQLiteManager.shared.getAllShoppingItems()
-    }
+            guard authViewModel.isLoggedIn else {
+                print("User is not logged in")
+                return
+            }
+            let userUID = authViewModel.currentUser.uid
+            shoping = SQLiteManager.shared.getAllShoppingItems(forUser: userUID)
+        }
     
     private func deleteShopingItem(id: Int) {
         SQLiteManager.shared.deleteShoppingItem(byId: id)

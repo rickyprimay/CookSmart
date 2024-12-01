@@ -15,7 +15,10 @@ struct AddSheetView: View {
     @Binding var gluten: Bool
     @Binding var keto: Bool
     @Environment(\.presentationMode) var presentationMode
-    
+    @Binding var minCalories: Double
+    @Binding var maxCalories: Double
+    @State private var errorMessage: String?
+
     var body: some View {
         ZStack {
             Color(hex: "#FFF6E9")
@@ -31,11 +34,38 @@ struct AddSheetView: View {
                     .font(.subheadline)
                     .foregroundColor(.secondary)
                 
-                TextField("Ingredient Name", text: $newIngredient)
+                TextField("Nama Bahan", text: $newIngredient)
                     .padding()
                     .background(Color.white)
                     .cornerRadius(10)
                     .padding(.horizontal)
+                
+                if let errorMessage = errorMessage {
+                    Text(errorMessage)
+                        .foregroundColor(.red)
+                        .font(.caption)
+                        .padding(.horizontal)
+                }
+                
+                Button {
+                    if ingredients.contains(newIngredient) {
+                        errorMessage = "Bahan '\(newIngredient)' sudah ada."
+                    } else {
+                        ingredients.append(newIngredient)
+                        newIngredient = ""
+                        errorMessage = nil
+                        presentationMode.wrappedValue.dismiss()
+                    }
+                } label: {
+                    Text("Tambahkan Bahan")
+                        .font(.headline)
+                        .foregroundColor(.white)
+                        .frame(maxWidth: .infinity)
+                        .padding()
+                        .background(Color(hex: "#47663B"))
+                        .cornerRadius(10)
+                }
+                .padding(.horizontal)
                 
                 VStack(alignment: .leading, spacing: 15) {
                     Toggle("Vegetarian", isOn: $vegetarian)
@@ -45,10 +75,51 @@ struct AddSheetView: View {
                 }
                 .padding(.horizontal)
                 
+                VStack(alignment: .leading, spacing: 15) {
+                    Text("Kalori").font(.headline)
+                        .opacity(ingredients.isEmpty ? 0.5 : 1.0)
+                    
+                    HStack {
+                        VStack(alignment: .leading, spacing: 8) {
+                            Text("Min:")
+                                .font(.subheadline)
+                            
+                            TextField("Min Kalori", value: $minCalories, format: .number)
+                                .keyboardType(.decimalPad)
+                                .frame(width: 80)
+                                .padding(8)
+                                .background(Color.white)
+                                .cornerRadius(10)
+                        }
+                        
+                        Spacer()
+                        
+                        VStack(alignment: .leading, spacing: 8) {
+                            Text("Max:")
+                                .font(.subheadline)
+                            
+                            TextField("Max Kalori", value: $maxCalories, format: .number)
+                                .keyboardType(.decimalPad)
+                                .frame(width: 80)
+                                .padding(8)
+                                .background(Color.white)
+                                .cornerRadius(10)
+                        }
+                    }
+                    .padding(.bottom, 20)
+
+                }
+                .padding(.horizontal)
+                
                 Button {
                     if !newIngredient.isEmpty {
                         ingredients.append(newIngredient)
                         newIngredient = ""
+                    }
+                    
+                    if minCalories > maxCalories {
+                        errorMessage = "Min Kalori harus lebih kecil dari Max Kalori"
+                        return
                     }
                     
                     if vegetarian && !ingredients.contains("Vegetarian") {
@@ -63,10 +134,10 @@ struct AddSheetView: View {
                     if keto && !ingredients.contains("Keto") {
                         ingredients.append("Keto")
                     }
-                    
+                
                     presentationMode.wrappedValue.dismiss()
                 } label: {
-                    Text("Save Filters")
+                    Text("Simpan Filter")
                         .font(.headline)
                         .foregroundColor(.white)
                         .frame(maxWidth: .infinity)

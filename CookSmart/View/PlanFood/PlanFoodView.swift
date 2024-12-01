@@ -14,10 +14,12 @@ struct PlanFoodView: View {
     @State private var startDate: Date = Calendar.current.date(byAdding: .day, value: -1, to: Date())!
     @State private var endDate: Date = Date()
     @State private var totalCalories: Float = 0
+    
+    @StateObject var authViewModel: AuthViewModel
 
     var body: some View {
         NavigationView {
-            ZStack {
+            ZStack(alignment: .top) {
                 Color(hex: "#FFF6E9")
                     .ignoresSafeArea()
                 
@@ -34,7 +36,7 @@ struct PlanFoodView: View {
                             .labelsHidden()
                         
                         Button("Terapkan") {
-                            planFood = SQLiteManager.shared.getPlanFoodByDateRange(startDate: startDate, endDate: endDate)
+                            planFood = SQLiteManager.shared.getPlanFoodByDateRange(forUser: authViewModel.currentUser.uid, startDate: startDate, endDate: endDate)
                             totalCalories = planFood.reduce(0) { $0 + ($1.calories ?? 0.0) }
                         }
                         .padding(.leading, 8)
@@ -71,7 +73,7 @@ struct PlanFoodView: View {
                             VStack(spacing: 15) {
                                 ForEach(planFood, id: \.idRecipe) { food in
                                     PlanFoodListItemView(foodRecipe: food) {
-                                        SQLiteManager.shared.deletePlanFood(byId: food.idRecipe)
+                                        SQLiteManager.shared.deletePlanFood(forUser: authViewModel.currentUser.uid, byId: food.idRecipe)
                                         loadFavorites()
                                     }
                                 }
@@ -89,7 +91,7 @@ struct PlanFoodView: View {
     }
     
     private func loadFavorites() {
-        planFood = SQLiteManager.shared.getPlanFoodByDateRange(startDate: startDate, endDate: endDate)
+        planFood = SQLiteManager.shared.getPlanFoodByDateRange(forUser: authViewModel.currentUser.uid, startDate: startDate, endDate: endDate)
         totalCalories = planFood.reduce(0) { $0 + ($1.calories ?? 0.0) }
     }
 }

@@ -10,7 +10,7 @@ import SwiftData
 
 class FoodRecipeViewModel: ObservableObject {
     
-    static let apiKey = "53e6ea0dcf0f45999f875a350a3fad53"
+    static let apiKey = "021a383a1fc448ad9eb0439b9fa6238b"
     
     @Published var foodRecipe: [Recipe] = []
     @Published var recommendedRecipes: [Recipe] = []
@@ -23,6 +23,8 @@ class FoodRecipeViewModel: ObservableObject {
     @Published var vegan: Bool = false
     @Published var gluten: Bool = false
     @Published var keto: Bool = false
+    
+    @Published var staticCount: Int = 4
     
     @Published var isLoading: Bool = false
     @Published var isFavorite: Bool = false
@@ -40,7 +42,7 @@ class FoodRecipeViewModel: ObservableObject {
             
             DispatchQueue.main.async {
                 self.foodRecipe = results.recipes
-                self.recommendedRecipes = Array(results.recipes.prefix(5)) // Ambil 5 data untuk rekomendasi
+                self.recommendedRecipes = Array(results.recipes.prefix(5))
             }
         } catch {
             print("Error: \(error.localizedDescription)")
@@ -97,10 +99,10 @@ class FoodRecipeViewModel: ObservableObject {
         }
     }
     
-    func generateRecipe(query: String, filters: [String: Bool], ingredients: [String]) async {
+    func generateRecipe(query: String, filters: [String: Bool], ingredients: [String], minCalories: Double, maxCalories: Double) async {
         DispatchQueue.main.async { self.isLoading = true }
         defer { DispatchQueue.main.async { self.isLoading = false } }
-        
+
         var urlString = "https://api.spoonacular.com/recipes/complexSearch?apiKey=\(FoodRecipeViewModel.apiKey)&query=\(query)"
         
         var filterValues: [String] = []
@@ -116,20 +118,24 @@ class FoodRecipeViewModel: ObservableObject {
             let ingredientFilter = ingredients.joined(separator: ",")
             urlString += "&includeIngredients=" + ingredientFilter
         }
-        
+
+        urlString += "&minCalories=\(Int(minCalories))&maxCalories=\(Int(maxCalories))"
+
         guard let url = URL(string: urlString) else { return }
-        
+
         do {
+            print("generated url: \(url)")
             let (data, _) = try await URLSession.shared.data(from: url)
             let decodedResult = try JSONDecoder().decode(GenerateRecipeResult.self, from: data)
             
             DispatchQueue.main.async {
                 self.generateRecipeResult = decodedResult.results
-                print("Decoded Recipes Count: \(decodedResult.results.count)")
             }
         } catch {
             print("Error fetching or decoding data: \(error.localizedDescription)")
         }
     }
+
+
 
 }

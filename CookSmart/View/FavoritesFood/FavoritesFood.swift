@@ -11,6 +11,7 @@ import SDWebImageSwiftUI
 struct FavoritesFoodView: View {
     @State private var favoriteFoods: [FavoriteFood] = []
     @StateObject var viewModel = FoodRecipeViewModel()
+    @StateObject var authViewModel: AuthViewModel
     
     var body: some View {
         NavigationView {
@@ -45,7 +46,8 @@ struct FavoritesFoodView: View {
                                 ForEach(favoriteFoods, id: \.idRecipe) { food in
                                     NavigationLink(destination: DetailFood(
                                         viewModel: viewModel,
-                                        idRecipe: food.idRecipe
+                                        idRecipe: food.idRecipe,
+                                        authViewModel: authViewModel
                                     )) {
                                         RecipeFavoriteListItemView(foodRecipe: food)
                                     }
@@ -66,7 +68,7 @@ struct FavoritesFoodView: View {
     
     private func loadFavorites() {
         DispatchQueue.main.async {
-            favoriteFoods = SQLiteManager.shared.getAllFavorites()
+            favoriteFoods = SQLiteManager.shared.getAllFavorites(user_id: authViewModel.currentUser.uid)
         }
     }
 }

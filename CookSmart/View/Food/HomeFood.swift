@@ -26,6 +26,11 @@ struct HomeFoodView: View {
     
     @State private var showAllRecipesSheet = false
     
+    @State private var showLogoutAlert = false
+    
+    @State private var minCalories: Double = 50
+    @State private var maxCalories: Double = 800
+    
     var body: some View {
         NavigationView {
             ZStack {
@@ -85,7 +90,9 @@ struct HomeFoodView: View {
                     vegetarian: $vegetarian,
                     vegan: $vegan,
                     gluten: $gluten,
-                    keto: $keto
+                    keto: $keto,
+                    minCalories: $minCalories,
+                    maxCalories: $maxCalories
                 )
             }
             .sheet(isPresented: $showAllRecipesSheet) {
@@ -94,13 +101,14 @@ struct HomeFoodView: View {
                         .font(.title)
                         .fontWeight(.bold)
                         .padding()
-
+                    
                     ScrollView {
                         LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 20) {
                             ForEach(viewModel.foodRecipe) { recipe in
                                 NavigationLink(destination: DetailFood(
                                     viewModel: viewModel,
-                                    idRecipe: recipe.id
+                                    idRecipe: recipe.id,
+                                    authViewModel: AuthViewModel()
                                 )) {
                                     RecipeCardViews(foodRecipe: recipe, viewModel: viewModel)
                                         .frame(maxWidth: .infinity, maxHeight: 200)
@@ -112,7 +120,7 @@ struct HomeFoodView: View {
                 }
                 .padding()
             }
-
+            
             .onAppear {
                 if !hasFetchedRandomRecipe {
                     Task {
@@ -120,6 +128,18 @@ struct HomeFoodView: View {
                         hasFetchedRandomRecipe = true
                     }
                 }
+            }
+            .alert(isPresented: $showLogoutAlert) {
+                Alert(
+                    title: Text("Konfirmasi Logout"),
+                    message: Text("Apakah Anda yakin ingin logout?"),
+                    primaryButton: .destructive(Text("Ya")) {
+                        Task {
+                            await AuthViewModel().signOut()
+                        }
+                    },
+                    secondaryButton: .cancel()
+                )
             }
         }
     }
@@ -137,11 +157,19 @@ struct HomeFoodView: View {
                     .foregroundColor(.secondary)
             }
             Spacer()
-            Image("me")
+            Image(systemName: "door.left.hand.open")
                 .resizable()
-                .scaledToFill()
-                .clipShape(Circle())
+                .scaledToFit()
                 .frame(width: 50, height: 50)
+                .foregroundColor(.red)
+                .padding(10)
+                .background(Color.white)
+                .clipShape(Circle())
+                .shadow(radius: 5)
+                .onTapGesture {
+                    showLogoutAlert = true
+                }
+            
         }
         .padding(.horizontal)
     }
@@ -187,11 +215,14 @@ struct HomeFoodView: View {
                 ForEach(viewModel.generateRecipeResult) { recipe in
                     NavigationLink(destination: DetailFood(
                         viewModel: viewModel,
-                        idRecipe: recipe.id
+                        idRecipe: recipe.id,
+                        authViewModel: AuthViewModel()
                     )) {
                         GenerateRecipeListItemView(foodRecipe: recipe)
                     }
                 }
+            } else if ingredients.isEmpty && searchText.isEmpty {
+                recommendedRecipesSection
             } else if searchText.isEmpty {
                 recommendedRecipesSection
             } else {
@@ -222,7 +253,8 @@ struct HomeFoodView: View {
                     ForEach(viewModel.recommendedRecipes) { foodRecipe in
                         NavigationLink(destination: DetailFood(
                             viewModel: viewModel,
-                            idRecipe: foodRecipe.id
+                            idRecipe: foodRecipe.id,
+                            authViewModel: AuthViewModel()
                         )) {
                             RecipeCardViews(foodRecipe: foodRecipe, viewModel: viewModel)
                         }
@@ -248,7 +280,8 @@ struct HomeFoodView: View {
                 ForEach(viewModel.searchRecipeResult) { recipe in
                     NavigationLink(destination: DetailFood(
                         viewModel: viewModel,
-                        idRecipe: recipe.id
+                        idRecipe: recipe.id,
+                        authViewModel: AuthViewModel()
                     )) {
                         RecipeListItemView(foodRecipe: recipe)
                     }
@@ -306,8 +339,18 @@ struct HomeFoodView: View {
             "keto": keto
         ]
         
-        Task {
-            await viewModel.generateRecipe(query: searchText, filters: filters, ingredients: ingredients)
+        if ingredients.isEmpty {
+            viewModel.generateRecipeResult = []
+        } else {
+            Task {
+                await viewModel.generateRecipe(
+                    query: searchText,
+                    filters: filters,
+                    ingredients: ingredients,
+                    minCalories: minCalories,
+                    maxCalories: maxCalories
+                )
+            }
         }
     }
 }

@@ -7,7 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		EA1866582CEE03AB0081113E /* SDWebImageSwiftUI in Frameworks */ = {isa = PBXBuildFile; productRef = EA1866572CEE03AB0081113E /* SDWebImageSwiftUI */; };
+		EAD0806C2CFC9CB000B97160 /* SDWebImageSwiftUI in Frameworks */ = {isa = PBXBuildFile; productRef = EAD0806B2CFC9CB000B97160 /* SDWebImageSwiftUI */; };
+		EAD080702CFC9E0D00B97160 /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = EAD0806F2CFC9E0D00B97160 /* FirebaseAuth */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -27,7 +28,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				EA1866582CEE03AB0081113E /* SDWebImageSwiftUI in Frameworks */,
+				EAD0806C2CFC9CB000B97160 /* SDWebImageSwiftUI in Frameworks */,
+				EAD080702CFC9E0D00B97160 /* FirebaseAuth in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -70,7 +72,8 @@
 			);
 			name = CookSmart;
 			packageProductDependencies = (
-				EA1866572CEE03AB0081113E /* SDWebImageSwiftUI */,
+				EAD0806B2CFC9CB000B97160 /* SDWebImageSwiftUI */,
+				EAD0806F2CFC9E0D00B97160 /* FirebaseAuth */,
 			);
 			productName = CookSmart;
 			productReference = EA8A10DC2CEDD4F8006E8FEB /* CookSmart.app */;
@@ -101,7 +104,8 @@
 			mainGroup = EA8A10D32CEDD4F8006E8FEB;
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
-				EA1866562CEE03AB0081113E /* XCRemoteSwiftPackageReference "SDWebImageSwiftUI" */,
+				EAD080692CFC9C8D00B97160 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
+				EAD0806A2CFC9CB000B97160 /* XCRemoteSwiftPackageReference "SDWebImageSwiftUI" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = EA8A10DD2CEDD4F8006E8FEB /* Products */;
@@ -335,7 +339,15 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
-		EA1866562CEE03AB0081113E /* XCRemoteSwiftPackageReference "SDWebImageSwiftUI" */ = {
+		EAD080692CFC9C8D00B97160 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/firebase/firebase-ios-sdk";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 11.5.0;
+			};
+		};
+		EAD0806A2CFC9CB000B97160 /* XCRemoteSwiftPackageReference "SDWebImageSwiftUI" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/SDWebImage/SDWebImageSwiftUI.git";
 			requirement = {
@@ -346,10 +358,15 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		EA1866572CEE03AB0081113E /* SDWebImageSwiftUI */ = {
+		EAD0806B2CFC9CB000B97160 /* SDWebImageSwiftUI */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = EA1866562CEE03AB0081113E /* XCRemoteSwiftPackageReference "SDWebImageSwiftUI" */;
+			package = EAD0806A2CFC9CB000B97160 /* XCRemoteSwiftPackageReference "SDWebImageSwiftUI" */;
 			productName = SDWebImageSwiftUI;
+		};
+		EAD0806F2CFC9E0D00B97160 /* FirebaseAuth */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = EAD080692CFC9C8D00B97160 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAuth;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
